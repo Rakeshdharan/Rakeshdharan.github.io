@@ -1,0 +1,2 @@
+(window.webpackJsonp__wix_thunderbolt_app=window.webpackJsonp__wix_thunderbolt_app||[]).push([[69],{264:function(e,t,n){"use strict";n.r(t);var a=n(0),i=n(5),o=n.n(i);t.default=function(e){var t=e.ReactComponent||function(){return o.a.createElement("div",null)},n=e.host&&e.host.isResponsive?{}:{height:"auto"};return o.a.createElement("div",{id:e.id,style:n},o.a.createElement(t,Object(a.a)({},e)))}}}]);
+//# sourceMappingURL=https://static.parastorage.com/services/wix-thunderbolt/dist/tpaWidgetNative.a1fd2699.chunk.min.js.map

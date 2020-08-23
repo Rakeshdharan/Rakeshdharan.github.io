@@ -1,0 +1,2 @@
+(window.webpackJsonp__wix_thunderbolt_app=window.webpackJsonp__wix_thunderbolt_app||[]).push([[71],{182:function(o,e,n){"use strict";var t=n(183);Object.assign(window.ReactDOM,t),window.ReactDomLoadedResolve()},5:function(o,e){o.exports=React}},[[182,1,80]]]);
+//# sourceMappingURL=https://static.parastorage.com/services/wix-thunderbolt/dist/vendor-react-dom.85ad27ea.chunk.min.js.map

@@ -1,3 +1,0 @@
-RAKESH D
-
-Innovative Engineer

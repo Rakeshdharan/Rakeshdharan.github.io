@@ -27,6 +27,11 @@ const projects = notes('Projects')
   .map((n) => ({ ...n.data, name: n.name, body: n.body, slug: n.data.slug || slugify(n.name), domains: list(n.data.domains), stack: list(n.data.stack), links: list(n.data.links) }))
   .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 
+const hackathons = notes('Hackathons')
+  .filter((n) => n.data.status === 'published')
+  .map((n) => ({ ...n.data, name: n.name, body: n.body, links: list(n.data.links) }))
+  .sort((a, b) => String(b.date ?? '').localeCompare(String(a.date ?? '')) || (a.order ?? 99) - (b.order ?? 99));
+
 const experience = notes('Experience').map((n) => ({ ...n.data, body: n.body }))
   .sort((a, b) => String(b.start).localeCompare(String(a.start)));
 const work = experience.filter((e) => e.kind !== 'education');
@@ -114,7 +119,7 @@ ${image ? `<meta property="og:image" content="${esc(image.startsWith('http') ? i
   <div class="wrap top-in">
     <a class="brand" href="${BASE}/">${logo}<span>${esc(P.name)}</span></a>
     <nav class="nav" aria-label="Main">
-      <a href="${BASE}/#work">Work</a><a href="${BASE}/#experience">Experience</a><a href="${BASE}/#skills">Skills</a><a href="${BASE}/#contact">Contact</a>
+      <a href="${BASE}/#work">Work</a><a href="${BASE}/#experience">Experience</a><a href="${BASE}/#skills">Skills</a>${hackathons.length ? `<a href="${BASE}/#hackathons">Hackathons</a>` : ''}<a href="${BASE}/#contact">Contact</a>
     </nav>
     <div class="controls">
       <div class="seg" role="group" aria-label="Explain for">
@@ -173,6 +178,26 @@ function expRow(e) {
       <p class="exp-org">${esc(e.org)}${e.place ? ` <span class="muted">· ${esc(e.place)}</span>` : ''}${e.grade ? ` <span class="muted">· Grade ${esc(e.grade)}</span>` : ''}</p>
       ${e.plain ? `<p class="only-everyone exp-plain">${inline(e.plain, mdOpts)}</p>` : ''}
       <div class="only-engineers exp-detail">${bullets}</div>
+    </div>
+  </li>`;
+}
+
+function hackathonRow(h) {
+  const proj = h.project && noteIndex.get(String(h.project).replace(/^\[\[|\]\]$/g, '').toLowerCase());
+  const links = [
+    proj ? `<a href="${proj}">Case study →</a>` : '',
+    ...h.links.map((l) => { const [label, url] = l.split('|').map((x) => x.trim()); return url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)} ↗</a>` : ''; }),
+  ].filter(Boolean).join(' · ');
+  const bullets = h.body.trim() ? `<div class="only-engineers exp-detail">${markdown(h.body, mdOpts)}</div>` : '';
+  return `<li class="exp">
+    <p class="exp-when mono">${esc(h.date ?? '')}</p>
+    <div class="exp-what">
+      <h3>${esc(h.title)}</h3>
+      <p class="exp-org">${esc(h.org ?? '')}${h.result ? ` <span class="muted">· ${esc(h.result)}</span>` : ''}${h.role ? ` <span class="muted">· ${esc(h.role)}</span>` : ''}</p>
+      ${h.plain ? `<p class="only-everyone exp-plain">${inline(h.plain, mdOpts)}</p>` : ''}
+      ${h.technical ? `<p class="only-engineers exp-plain">${inline(h.technical, mdOpts)}</p>` : ''}
+      ${bullets}
+      ${links ? `<p class="mono exp-links">${links}</p>` : ''}
     </div>
   </li>`;
 }
@@ -245,11 +270,12 @@ const expSec = section('experience', '02', 'Experience', `<ol class="exps">${wor
   <h3 class="sub mono">Education</h3><ol class="exps">${education.map(expRow).join('')}</ol>`);
 
 const skillSec = section('skills', '03', 'Skills', skillsBlock());
-const recogSec = section('recognition', '04', 'Recognition', recognitionBlock());
+const hackSec = hackathons.length ? section('hackathons', '04', 'Hackathons', `<ol class="exps">${hackathons.map(hackathonRow).join('')}</ol>`) : '';
+const recogSec = section('recognition', hackathons.length ? '05' : '04', 'Recognition', recognitionBlock());
 
 const ghRecent = recent.length ? `<div class="recent"><p class="mono muted">Recently active on GitHub</p><ul>${recent.map((r) => `<li><a href="${esc(r.html_url)}" target="_blank" rel="noopener">${esc(r.name)}</a><span class="mono muted">${r.language ? esc(r.language) + ' · ' : ''}<time class="rel" datetime="${esc(r.pushed_at)}">${esc(r.pushed_at.slice(0, 10))}</time></span></li>`).join('')}</ul></div>` : '';
 
-const contactSec = section('contact', '05', 'Contact', `<div class="contact">
+const contactSec = section('contact', hackathons.length ? '06' : '05', 'Contact', `<div class="contact">
   <p class="contact-lede">${esc(P.open_to ? `Open to ${P.open_to.charAt(0).toLowerCase()}${P.open_to.slice(1)}.` : '')} The fastest way to reach me is email.</p>
   <a class="big-mail" href="mailto:${esc(P.email)}">${esc(P.email)}</a>
   <ul class="links">
@@ -265,7 +291,7 @@ const firstVisual = projects.find((p) => p.poster || p.image);
 const homeHtml = layout({
   title: `${P.name} — ${P.role}`,
   description: `${P.name}, ${P.role.toLowerCase()} in ${P.location}. ${P.headline}`,
-  body: hero + about + workSec + expSec + skillSec + recogSec + contactSec,
+  body: hero + about + workSec + expSec + skillSec + hackSec + recogSec + contactSec,
   image: firstVisual ? mediaSrc(firstVisual.poster || firstVisual.image) : undefined,
 });
 

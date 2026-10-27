@@ -137,7 +137,7 @@ ${body}
 <footer class="foot">
   <div class="wrap foot-in mono">
     <span>© ${new Date().getFullYear()} ${esc(P.name)}</span>
-    <span>Built from an Obsidian vault with a dependency-free Node script · no cookies, no trackers · updated <time datetime="${new Date().toISOString()}">${new Date().toISOString().slice(0, 10)}</time></span>
+    <span>Built from an Obsidian vault with a dependency-free Node script · no cookies, no trackers · hero duck: model &amp; policies from <a href="https://github.com/00make/microduck-arena">microduck-arena</a> (MIT) · updated <time datetime="${new Date().toISOString()}">${new Date().toISOString().slice(0, 10)}</time></span>
   </div>
 </footer>
 <script src="${BASE}/assets/app.js?v=${BUILD_ID}" defer></script>
@@ -241,11 +241,25 @@ const hero = `<section class="hero">
     <figure class="arm-fig">
       <div class="arm-box">
         <canvas id="arm" aria-label="Interactive robot arm that reaches toward your cursor" role="img"></canvas>
-        <div class="arm-readout mono only-engineers" aria-hidden="true"><span id="ro-q"></span><span id="ro-e"></span></div>
+        <canvas id="duck" hidden aria-label="A small robot duck walking in a physics simulation, controlled by a trained neural network" role="img"></canvas>
+        <div class="arm-readout mono only-engineers" id="arm-ro" aria-hidden="true"><span id="ro-q"></span><span id="ro-e"></span></div>
+        <div class="arm-readout mono only-engineers" id="duck-ro" hidden aria-hidden="true"><span id="dk-pol"></span><span id="dk-cmd"></span><span id="dk-cnt"></span></div>
+        <div class="duck-ctl" id="duck-ctl" hidden>
+          <button type="button" class="btn btn-sm" data-duck="push">Push it</button>
+          <button type="button" class="btn btn-sm" data-duck="roll">Roll</button>
+          <button type="button" class="btn btn-sm" data-duck="reset">Reset</button>
+        </div>
+        <div class="duck-load mono" id="duck-load" hidden>loading RL policy…</div>
       </div>
       <figcaption class="mono">
-        <span class="only-everyone">Move your cursor or tap: this arm works out how to bend its three joints to reach it — the same problem every robot arm solves.</span>
-        <span class="only-engineers">3-DOF planar arm · cyclic coordinate descent (CCD) inverse kinematics · joint limits ±150° · running live in your browser.</span>
+        <span class="arm-cap">
+          <span class="only-everyone">Move your cursor or tap: this arm works out how to bend its three joints to reach it — the same problem every robot arm solves.</span>
+          <span class="only-engineers">3-DOF planar arm · cyclic coordinate descent (CCD) inverse kinematics · joint limits ±150° · running live in your browser.</span>
+        </span>
+        <span class="duck-cap" hidden>
+          <span class="only-everyone">This little robot duck learned to walk by trial and error in simulation. Move your cursor or tap to send it somewhere, shove it, and watch it get back up. Runs live in your browser.</span>
+          <span class="only-engineers">Open Duck–style biped · pretrained RL policies (walk / get-up / roll, MLP 61→512→256→128→14) · MuJoCo WASM physics 200 Hz, policy 50 Hz · all client-side. Model &amp; policies: <a href="https://github.com/00make/microduck-arena">microduck-arena</a> (MIT).</span>
+        </span>
       </figcaption>
     </figure>
   </div>

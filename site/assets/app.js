@@ -16,8 +16,8 @@
   /* ---- Theme ---- */
   const themeBtn = document.querySelector('.theme-btn');
   const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-  themeBtn?.addEventListener('click', () => { const t = isDark() ? 'light' : 'dark'; root.dataset.theme = t; store.set('theme', t); arm?.refreshColors(); });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => arm?.refreshColors());
+  themeBtn?.addEventListener('click', () => { const t = isDark() ? 'light' : 'dark'; root.dataset.theme = t; store.set('theme', t); arm?.refreshColors(); duck?.refreshColors(); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { arm?.refreshColors(); duck?.refreshColors(); });
 
   /* ---- Project filters ---- */
   const chips = document.querySelectorAll('.chip[data-filter]');
@@ -56,8 +56,9 @@
 
   /* ---- Interactive 3-DOF arm: CCD inverse kinematics ---- */
   const canvas = document.getElementById('arm');
-  let arm = null;
+  let arm = null, duck = null;
   if (canvas) arm = createArm(canvas);
+  if (canvas) initDuck();
 
   function createArm(cv) {
     const ctx = cv.getContext('2d');
@@ -154,7 +155,9 @@
       }
     }
 
+    let stopped = false;
     function step(now) {
+      if (stopped) return;
       if (visible) {
         const t = (now - t0) / 1000;
         if (now - lastInput > 2500) goal = idlePoint(t);
@@ -181,6 +184,58 @@
     refreshColors(); resize();
     if (!reduced) requestAnimationFrame(step);
     else { goal = idlePoint(0.9); target = { ...goal }; q = ccd(q, target); draw(); }
-    return { refreshColors };
+    return { refreshColors, stop() { stopped = true; }, start() { if (!stopped) return; stopped = false; if (!reduced) requestAnimationFrame(step); } };
+  }
+
+  /* ---- Robot duck (MuJoCo WASM + pretrained RL policies); the arm above stays as the fallback ---- */
+  function initDuck() {
+    const dc = document.getElementById('duck');
+    if (!dc) return;
+    const nav = navigator, conn = nav.connection || {};
+    const ok = typeof WebAssembly === 'object' && !reduced && !conn.saveData && !/(^|-)2g$/.test(conn.effectiveType || '') &&
+      (nav.deviceMemory || 4) >= 2 && (nav.hardwareConcurrency || 4) >= 2 &&
+      !!document.createElement('canvas').getContext('webgl2') && new URLSearchParams(location.search).get('duck') !== '0';
+    if (!ok) return;
+    const $ = (id) => document.getElementById(id);
+    const box = dc.parentElement, load = $('duck-load'), ctl = $('duck-ctl');
+    const heroEl = document.querySelector('.hero');
+    let started = false;
+    const start = async () => {
+      if (started) return; started = true;
+      load.hidden = false;
+      try {
+        const mod = await import('./duck/duck.js');
+        dc.hidden = false;
+        const pol = $('dk-pol'), cmd = $('dk-cmd'), cnt = $('dk-cnt');
+        duck = await mod.createDuck(dc, {
+          onStats: (s, st) => {
+            pol.textContent = `policy: ${s.policy} · ${s.hz} Hz`;
+            cmd.textContent = `cmd vx ${s.vx.toFixed(2)} m/s · wz ${s.wz.toFixed(2)}`;
+            cnt.textContent = `pushes ${s.pushes} · falls ${s.falls} · recovered ${s.recoveries}`;
+          },
+          onSlow: () => giveUp(),
+        });
+        if (location.search.includes('duckdebug')) window.__duck = duck;
+        arm?.stop(); $('arm').hidden = true; $('arm-ro').hidden = true;
+        $('duck-ro').hidden = false; ctl.hidden = false; load.hidden = true;
+        box.querySelectorAll('canvas').forEach((c) => { c.style.cursor = c.id === 'duck' ? 'pointer' : ''; });
+        document.querySelector('.arm-cap').hidden = true; document.querySelector('.duck-cap').hidden = false;
+        duck.refreshColors();
+        heroEl?.addEventListener('pointermove', (ev) => { if (ev.pointerType === 'mouse') duck.pointerTo(ev.clientX, ev.clientY); });
+        dc.addEventListener('pointerdown', (ev) => duck.pointerTo(ev.clientX, ev.clientY));
+        ctl.addEventListener('click', (ev) => { const a = ev.target.closest('[data-duck]')?.dataset.duck; if (a === 'push') duck.push(); else if (a === 'roll') duck.roll(); else if (a === 'reset') duck.reset(); });
+      } catch (err) { console.warn('duck unavailable, keeping arm', err); giveUp(); }
+    };
+    function giveUp() {
+      load.hidden = true; ctl.hidden = true; dc.hidden = true; $('duck-ro').hidden = true;
+      duck?.dispose(); duck = null;
+      $('arm').hidden = false; $('arm-ro').hidden = false;
+      document.querySelector('.arm-cap').hidden = false; document.querySelector('.duck-cap').hidden = true;
+      arm?.start();
+    }
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); start(); } });
+      io.observe(box);
+    } else start();
   }
 })();

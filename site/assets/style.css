@@ -94,6 +94,13 @@ html[data-mode="everyone"] .only-engineers, html[data-mode="engineers"] .only-ev
 .arm-box { position: relative; aspect-ratio: 1 / 0.92; border: 1px solid var(--line); border-radius: var(--radius); background:
   radial-gradient(circle, var(--line-2) 1px, transparent 1.2px) 0 0 / 22px 22px, var(--bg-2); overflow: hidden; touch-action: none; }
 .arm-box canvas { width: 100%; height: 100%; cursor: crosshair; }
+.arm-box [hidden] { display: none !important; }
+.duck-ctl { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; }
+.btn-sm { font-size: 0.72rem; padding: 4px 10px; line-height: 1.4; background: var(--bg); cursor: pointer; font-family: var(--mono); }
+.duck-load { position: absolute; left: 12px; bottom: 10px; color: var(--muted); font-size: 0.7rem; pointer-events: none; }
+.duck-load::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 6px; animation: duckpulse 1s ease-in-out infinite alternate; }
+@keyframes duckpulse { to { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) { .duck-load::before { animation: none; } }
 .arm-readout { position: absolute; left: 12px; top: 10px; display: flex; flex-direction: column; gap: 2px; color: var(--muted); font-size: 0.7rem; pointer-events: none; }
 .arm-fig figcaption { margin-top: 12px; color: var(--muted); font-size: 0.74rem; line-height: 1.5; }
 @media (max-width: 860px) {

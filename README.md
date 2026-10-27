@@ -4,7 +4,8 @@ Robotics portfolio of **Rakesh Dhamodharan**, built from an Obsidian vault by a 
 
 - `vault/`: the Obsidian vault and **all site content**. Open this folder in Obsidian (*Open folder as vault*).
 - `scripts/build.mjs`: turns the vault into static HTML in `dist/`.
-- `site/assets/`: CSS, JS (Everyone/Engineers toggle, filters, inverse-kinematics arm) and favicon.
+- `site/assets/`: CSS, JS (Everyone/Engineers toggle, filters, inverse-kinematics arm, the fallback hero) and favicon.
+- `site/assets/duck/`: hero robot duck: MuJoCo WASM + exported RL policies (`policies/*.bin`) + model. The bundle `duck.js` is built from `duck/` (`cd duck && npm install && npm run build`); the site build only copies it. Falls back to the arm when WASM/WebGL2 is missing, on Save-Data/slow links, with reduced motion, on load failure or sustained low frame rate (`?duck=0` forces the fallback). Model and policies: [00make/microduck-arena](https://github.com/00make/microduck-arena) (MIT, see `duck/LICENSE.microduck-arena`); `duck/export_policies.py` converts the ONNX policies to `.bin`.
 - `.github/workflows/deploy.yml`: builds and deploys to GitHub Pages on every push and nightly.
 
 ## Preview locally

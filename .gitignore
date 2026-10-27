@@ -1,0 +1,18 @@
+# Build output
+dist/
+node_modules/
+.DS_Store
+
+# Personal documents — contain address, phone, date of birth. Never publish.
+*.pdf
+!vault/Attachments/*.pdf
+
+# Obsidian: private notes and per-device UI state
+vault/Private/*
+!vault/Private/README.md
+vault/.obsidian/workspace*.json
+vault/.obsidian/cache
+vault/.trash/
+
+# Transfer leftovers
+*.tgz

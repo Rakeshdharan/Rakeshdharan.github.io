@@ -1,0 +1,9 @@
+{
+  "attachmentFolderPath": "Attachments",
+  "newFileLocation": "folder",
+  "newFileFolderPath": "Projects",
+  "useMarkdownLinks": false,
+  "alwaysUpdateLinks": true,
+  "showFrontmatter": true,
+  "propertiesInDocument": "visible"
+}

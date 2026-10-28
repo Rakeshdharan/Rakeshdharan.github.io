@@ -28,6 +28,7 @@ jobs:
         run: node scripts/build.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_PATH: /rakesh.robotics
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
